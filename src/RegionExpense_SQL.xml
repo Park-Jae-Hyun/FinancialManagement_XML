@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="RegionExpense">
+	<!-- 년도와 월을 입력받아 계정이름 들고오기 -->
+	<select id="getAccountList"  parameterClass="HashMap"  resultClass="HashMap">
+	select account_id, account_name
+	from account
+	where years=#year#
+	and month=#month#
+	</select>
+	
+	<!-- 새로운 계정 등록 -->
+	<update id="insertExpense"  parameterClass="HashMap" >
+	INSERT INTO detail
+	(
+		day,
+		using_cost,
+		supply_cost,
+		vat,
+		client,
+		method,
+		settlement,
+		account_id,
+		region_id,
+		is_write,
+		tax_type,
+		public_type
+	)
+	VALUES
+	(
+		to_date('$ExpenseMonth$/$ExpenseDay$/$ExpenseYear$','mm/dd/yyyy'),
+		<!--STR_TO_DATE('$ExpenseMonth$/$ExpenseDay$/$ExpenseYear$', '%m/%d/%Y'),-->
+		#ExpensePay#,
+		'0',
+		'0',
+		#ExpenseName#,
+		#ExpenseAccountPayMethod#,
+		#settlement#,
+		#ExpenseAccountId#,
+		#ExpenseRegionId#,
+		'0',
+		#ExpenseTex#,
+		#ExpenseType#
+	)
+	</update>
+	
+	<!-- 계정 수정 -->
+	<update id = "modifyExpense" parameterClass="HashMap">
+	update detail
+	set
+	day = todate('$ExpenseMonth$/$ExpenseDay$/$ExpenseYear$', 'mm/dd/yyyy'),
+	<!--set day = STR_TO_DATE('$ExpenseMonth$/$ExpenseDay$/$ExpenseYear$', '%m/%d/%Y'),-->
+	using_cost = #ExpensePay#,
+	client = #ExpenseName#,
+	method = #ExpenseAccountPayMethod#,
+	settlement = #settlement#,
+	account_id = #ExpenseAccountId#,
+	region_id = #ExpenseRegionId#,
+	tax_type = #ExpenseTex#,
+	public_type = #ExpenseType#
+	where id=#id#
+	</update>	
+	
+	
+	<!-- 지역관리 경비현황 리스트 -->
+	<select id="getRegionExpenseList"  parameterClass="HashMap"  resultClass="HashMap">
+	SELECT a.account_id, b.region_id, a.account_name, SUM(b.budget) budget, nvl(SUM(d.cost),0) cost, (SUM(b.budget) - nvl(SUM(d.cost),0)) remain <!--CAST(SUM(b.budget) - IFNULL(SUM(d.cost),0) AS SIGNED)-->
+	FROM account a, account_budget b left outer join (
+													SELECT account_id, region_id, SUM(using_cost) cost
+													FROM detail
+													WHERE is_write = 1
+													GROUP BY account_id, region_id) d
+	on b.account_id = d.account_id
+	and b.region_id = d.region_id
+	where a.account_id = b.account_id
+	AND a.years = #year# AND a.month = #month#
+	AND b.region_id= #region_id#
+	GROUP BY a.account_name
+	</select>
+	
+	<!-- 지역관리 경비 요약 -->
+	<select id="getRegionExpenseSummaryList"  parameterClass="HashMap"  resultClass="HashMap">
+	SELECT SUM(b.budget) budget, nvl(SUM(d.cost),0) cost, (SUM(b.budget) - nvl(SUM(d.cost),0)) remain
+	FROM account_budget b, account a left outer join (
+													SELECT account_id, SUM(using_cost) cost
+													FROM detail
+													WHERE is_write = 0
+													GROUP BY account_id) d
+	on a.account_id = d.account_id
+	where a.account_id = b.account_id
+	AND a.years = #year# AND a.month = #month#
+	AND b.region_id= #region_id#
+	</select>
+
+
+	<!-- 지역관리 경비 세부 정보 -->
+	<select id="getRegionExpenseDetailAllList"  parameterClass="HashMap"  resultClass="HashMap">
+	select id,  to_char(day, 'YYYY-MM-DD') day, using_cost, client, method, settlement, is_write, public_type, tax_type, (select account_name from account where account_id = d.account_id) as account_name
+	from detail d
+	where region_id=#region_id#
+	and day like "%$yearmonth$%" 
+	order by day desc, id desc;
+	</select>	
+	<!-- 지역관리 경비 세부 정보 (전체 공비만 보기) -->
+	<select id="getRegionExpenseDetailList1_1"  parameterClass="HashMap"  resultClass="HashMap">
+	select id,  to_char(day, 'YYYY-MM-DD') day, using_cost, client, method, settlement, is_write, public_type, tax_type, (select account_name from account where account_id = d.
+	account_id) as account_name 
+	from detail d
+	where region_id=#region_id#
+	and public_type = '공비'
+	and day like "%$yearmonth$%" 
+	order by day desc, id desc;
+	</select>	
+	<!-- 지역관리 경비 세부 정보 (공비만 보기) -->
+	<select id="getRegionExpenseDetailList1_2"  parameterClass="HashMap"  resultClass="HashMap">
+	select id,  to_char(day, 'YYYY-MM-DD') day, using_cost, client, method, settlement, is_write, public_type, tax_type, (select account_name from account where account_id = d.
+	account_id) as account_name 
+	from detail d
+	where account_id=#account_id#
+	and region_id=#region_id#
+	and public_type = '공비'
+	order by day desc, id desc;
+	</select>	
+	<select id="getRegionExpenseDetailList"  parameterClass="HashMap"  resultClass="HashMap">
+	select id,  to_char(day, 'YYYY-MM-DD') day, using_cost, client, method, settlement, is_write, public_type, tax_type, (select account_name from account where account_id = d.
+	account_id) as account_name 
+	from detail d
+	where account_id=#account_id#
+	and region_id=#region_id#
+	and public_type = '공비'
+	order by day desc, id desc;
+	</select>
+	<!-- 지역관리 경비 세부 정보 (승인만 보기) -->
+	<select id="getRegionExpenseDetailList0"  parameterClass="HashMap"  resultClass="HashMap">
+	select id,  to_char(day, 'YYYY-MM-DD') day, using_cost, client, method, settlement, is_write
+	from detail
+	where account_id=#account_id#
+	and region_id=#region_id#
+	and is_write=0
+	order by day desc, id desc;
+	</select>	
+	<!-- 지역관리 경비 세부 정보 (사비만 보기) -->
+	<select id="getRegionExpenseDetailList2"  parameterClass="HashMap"  resultClass="HashMap">
+	select id,  to_char(day, 'YYYY-MM-DD') day, using_cost, client, method, settlement, is_write, public_type, tax_type, (select account_name from account where account_id = d.
+	account_id) as account_name 
+	from detail d
+	where region_id=#region_id#
+	and public_type = '사비'
+	and day like "%$yearmonth$%" 
+	order by day desc, id desc;
+	</select>			
+	<!-- 승인 -->
+	<update id = "updateAccount" parameterClass="HashMap">
+	update detail
+	set is_write = 1
+	where account_id=#account_id#
+	and region_id=#region_id#
+	and id=#id#
+	</update>		
+	<!-- 삭제 -->
+	<delete id = "deleteAccount" parameterClass="HashMap">
+	delete 
+	from detail
+	where id=#id#
+	</delete>	
+	
+
+	<!-- 지역관리 경비 수정 세부 정보 -->
+	<select id="getRegionExpenseDetailModify"  parameterClass="HashMap"  resultClass="HashMap">
+	select id,  to_char(day, 'YYYY-MM-DD') day, using_cost, account_id, client, method, settlement, is_write, public_type, tax_type
+	from detail
+	where id=#id#
+	</select>
+	
+	<!-- 엑셀 다운로드 -->
+	<select id="getRegionExpenseExcelDetailList"  parameterClass="HashMap"  resultClass="HashMap">
+	select d.account_id, d.region_id, d.day, (select account_name from account where d.account_id = account_id) as account_name, (select budget from account_budget where d.account_id = account_id and d.region_id = region_id) as budget, d.method, d.public_type, d.client, d.tax_type, d.using_cost, d.is_write
+	from	detail d
+	where d.region_id = #region_id#
+	and d.day BETWEEN #date1# AND #date2#
+	</select>		
+	
+	
+	<select id ="getGCMPushInfoExpense" parameterClass="String" resultClass="HashMap">
+	select source1.account_id, source1.region_id, source1.client, source1.using_cost, source2.cost, source3.budget, (source3.budget - source2.cost) remain
+	from
+	(
+		select account_id, region_id, client, using_cost
+		from detail
+		where id = #id#
+	) source1,
+	(
+		select account_id, region_id, sum(using_cost) cost
+		from detail
+		where is_write = 1
+		group by account_id, region_id
+	) source2,
+	account_budget source3
+	where source1.account_id = source2.account_id
+	and source1.region_id = source2.region_id
+	and source1.account_id = source3.account_id
+	and source1.region_id = source3.region_id
+	</select>
+</sqlMap>

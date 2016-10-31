@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="SharingSite">
+	
+	<select id="getSiteList"  parameterClass="HashMap"  resultClass="HashMap">
+	select uid, site_name, site_id, site_pw, site_url
+	from shared_site
+	</select>
+
+	
+	<select id="getSite"  parameterClass="HashMap"  resultClass="HashMap">
+	select uid, site_name, site_id, site_pw, site_url
+	from shared_site
+	where uid = #uid#
+	</select>
+	
+	<update id="updateSite"  parameterClass="HashMap" >
+	update shared_site
+	set site_name = #site_name#,
+	site_id = #site_id#,
+	site_pw = #site_pw#,
+	site_url = #site_url#
+	where uid = #uid#
+	</update>
+	
+	<update id="insertSite"  parameterClass="HashMap" >
+	insert into shared_site (site_name, site_id, site_pw, site_url)
+	values (#site_name#, #site_id#, #site_pw#, #site_url#) 
+	</update>
+	
+	<update id="deleteSite"  parameterClass="HashMap" >
+	delete from shared_site where uid = #uid# 
+	</update>
+</sqlMap>

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="MemberManage">
+
+	<select id="getUserList"  parameterClass="HashMap"  resultClass="HashMap">
+	select user_id, user_name, region_id, level, phone
+	from user
+	</select>
+	
+	<update id="updateMember" parameterClass="HashMap" >
+	update user
+	set region_id = #region_id#,
+		 level = #level#
+	where user_id = #user_id#
+	</update>
+	
+	<select id="getUserInfo"  parameterClass="HashMap"  resultClass="HashMap">
+	select user_id, user_name, region_id, level, phone
+	from user
+	where user_id = #user_id#
+	</select>	
+
+	<update id="updateMemberPassword" parameterClass="HashMap" >
+	update user
+	set user_pass = password(0)
+	where user_id = #user_id#
+	</update>	
+	
+</sqlMap>

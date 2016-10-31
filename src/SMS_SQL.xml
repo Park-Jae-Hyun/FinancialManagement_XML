@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="SMS">
+	
+	<select id="getPendingSMS" parameterClass="HashMap" resultClass="HashMap">
+	SELECT PENDING_ID, SEND_FROM, PHONE, RECEIVE_DATE, MONEY, BILL_TYPE, CLIENT_NAME
+	FROM SMS_PENDING
+	WHERE PHONE IN (SELECT PHONE FROM USER WHERE REGION_ID = #region_id#)
+	</select>
+	
+	<update id="insertSMS"  parameterClass="HashMap" >
+	insert into sms_pending (send_from, phone, receive_date, money, bill_type, client_name)
+	values (#from#, #phone#, #receive_date#, #money#, #bill_type#, #client_name#) 
+	</update>
+	
+	<update id="deleteSMS"  parameterClass="HashMap" >
+	delete 
+	from sms_pending
+	where pending_id=#pending_id#
+	</update>	
+</sqlMap>

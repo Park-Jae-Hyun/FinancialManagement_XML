@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="Account">
+	<delete id = "DeleteAccountProcess" parameterClass="HashMap">
+	delete 
+	from account
+	where account_id=#account_id#
+	</delete>
+	
+	<delete id = "DeleteBudgetProcess" parameterClass="HashMap">
+	delete 
+	from account_budget
+	where account_id=#account_id#
+	</delete>	
+	
+	<delete id = "DeleteLendProcess" parameterClass="HashMap">
+	delete 
+	from lend_money
+	where account_id=#account_id#
+	</delete>		
+	
+	<delete id = "DeleteDetailProcess" parameterClass="HashMap">
+	delete 
+	from detail
+	where account_id=#account_id#
+	</delete>	
+
+	<delete id = "DeleteDetailProcess2" parameterClass="HashMap">
+	delete 
+	from detail
+	where id=#id#
+	</delete>		
+		
+</sqlMap>

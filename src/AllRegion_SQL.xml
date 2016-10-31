@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="AllRegion">
+
+	<!-- 해당 월 전국 계정 목록 들고오기 -->
+	<select id="getAllAccountFromYearMonth"  parameterClass="HashMap"  resultClass="HashMap">
+	SELECT a.account_id, a.account_name, SUM(b.budget) budget, nvl(SUM(d.cost),0) cost,(SUM(b.budget) - nvl(SUM(d.cost),0)) remain
+	FROM account a , account_budget b  left outer join (
+																		SELECT account_id, region_id, SUM(using_cost) cost
+																		FROM detail
+																		WHERE is_write = 1
+																		GROUP BY account_id, region_id) d
+	on b.account_id = d.account_id
+	and b.region_id = d.region_id
+	where a.years = #year# AND a.month = #month#
+	and a.account_id = b.account_id
+	GROUP BY b.account_id
+	</select>
+
+	<!-- 해당 월 특정 계정 전지역 사용 내역 들고오기 -->
+	<select id="getRegionAccountFromYearMonth"  parameterClass="HashMap"  resultClass="HashMap">
+	SELECT a.account_id, a.account_name, r.region_id, r.region_name, b.budget budget, nvl(d.cost,0) cost, (b.budget - nvl(d.cost,0)) remain
+	FROM  region r, account a, account_budget b left outer join
+	(
+		SELECT account_id, region_id, SUM(using_cost) cost
+		FROM detail
+		WHERE is_write = 1
+		GROUP BY account_id, region_id
+	) d
+	on b.account_id = d.account_id
+	and b.region_id = d.region_id
+	WHERE	 b.region_id = r.region_id
+	and a.account_id = b.account_id
+	and a.account_id = #account_id#
+	and a.years = #year#
+	and a.month = #month#
+	order by r.region_order
+	</select>
+	
+	<!-- 해당 지역 계정 사용내역 가져오기 -->
+	<select id="getRegionWithdrawl"  parameterClass="HashMap"  resultClass="HashMap">
+	SELECT d.id, to_Char(d.day, 'YYYY-MM-DD') day, (case (d.is_write) when 1 then '공비' else '사비') type, d.client, d.using_cost
+	FROM account a, detail d
+	WHERE a.account_id = d.account_id
+	and a.account_id = #account_id#
+	and d.region_id = #region_id#
+	and d.is_write = 1
+	order by d.day desc
+	</select>
+		
+	<!-- 경비 수정하기 -->
+	<update id = "RegionAccountModifyProcess" parameterClass="HashMap">
+	update account
+	set account_name = #account_name#
+	where account_id = #account_id#
+	</update>	
+	
+	<!-- 경비 예산 수정하기 -->
+	<update id = "RegionAccountModifyMoneyProcess" parameterClass="HashMap">
+	update account_budget
+	set budget = #budget#
+	where account_id = #account_id#
+	and region_id = #region_id#
+	</update>	
+
+</sqlMap>

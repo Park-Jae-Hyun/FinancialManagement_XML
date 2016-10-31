@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="LendExpense">
+	<!-- 새로운 요청 등록 -->
+	<update id="insertRequest"  parameterClass="HashMap" >
+	INSERT INTO lend_money
+	(
+		year,
+		month,
+		account_id,
+		region_from,
+		region_to,
+		money,
+		user_from
+	)
+	VALUES
+	(
+		#year#,
+		#month#,
+		#account_id#,
+		#region_from#,
+		#region_to#,
+		#money#,
+		#user_from#
+	)
+	</update>
+	
+	
+	<!-- 지역 빌리기 목록 -->
+	<select id="getLendRequestList"  resultClass="HashMap">
+	select l.request_id, l.year, l.month, l.money, l.account_id, a.account_name, 
+			 l.region_from, r1.region_name region_from_name, l.region_to, r2.region_name region_to_name, 
+			 l.user_from, l.user_to, l.user_final
+	from lend_money l,
+			region r1,
+			region r2,
+			account a
+	where l.region_from = r1.region_id
+	and l.region_to = r2.region_id
+	and l.account_id = a.account_id
+	</select>
+	
+	<!-- 상태 체크 -->
+	<select id="getLendRequest"  parameterClass="HashMap" resultClass="HashMap">
+	select l.request_id, l.year, l.month, l.money, l.account_id,  
+			 l.region_from, l.region_to,  l.user_from, l.user_to, l.user_final
+	from lend_money l
+	where l.request_id = #request_id#
+	</select>
+	
+	<!-- 지역  담당자 승인 -->
+	<update id="acceptUserTo"  parameterClass="HashMap" >
+	update lend_money
+	set user_to = #my_user_id#
+	where request_id = #request_id#
+	</update>
+	
+	<!-- 관리자 최종 승인 -->
+	<update id="acceptUserFinal"  parameterClass="HashMap" >
+	update lend_money
+	set user_final = #my_user_id#
+	where request_id = #request_id#
+	</update>
+	
+	<!-- 이후 처리 -->
+	<update id="acceptFinalProcess1"  parameterClass="HashMap" >
+	update account_budget
+	set budget = budget - (select money from lend_money where request_id = #request_id#)
+	where account_id = (select account_id from lend_money where request_id = #request_id#)
+	and region_id = (select region_from from lend_money where request_id = #request_id#)
+	</update>
+	
+	<update id="acceptFinalProcess2"  parameterClass="HashMap" >
+	update account_budget
+	set budget = budget + (select money from lend_money where request_id = #request_id#)
+	where account_id = (select account_id from lend_money where request_id = #request_id#)
+	and region_id = (select region_to from lend_money where request_id = #request_id#)
+	</update>
+	
+	<select id="ajaxRemainBudgetByRegion" parameterClass="HashMap" resultClass="HashMap">
+	SELECT sum(a.VALUE) remains
+	FROM
+	(
+		select b.budget VALUE
+		from account_budget b
+		where b.account_id = #account_id#
+		and b.region_id = #region_id#
+		UNION ALL
+		select nvl(sum(d.using_cost), 0) VALUE
+		from detail d
+		where d.account_id = #account_id#
+		and d.region_id = #region_id#
+	) a
+	</select>
+	
+	<!-- 기각 테이블 행 삭제 -->
+	<delete id = "rejectDeleteRow" parameterClass="HashMap">
+	delete 
+	from lend_money
+	where request_id=#request_id#
+	</delete>		
+	
+	<select id = "rejectUpdateFromSearch" parameterClass="HashMap" resultClass="HashMap">
+	select budget
+	from account_budget
+	where account_id=#account_id#
+	and region_id=#region_from#
+	</select>		
+
+	<update id="rejectUpdateFrom"  parameterClass="HashMap" >
+	update account_budget
+	set budget = #money#
+	where account_id=#account_id#
+	and region_id=#region_from#
+	</update>
+
+	<select id = "rejectUpdateToSearch" parameterClass="HashMap" resultClass="HashMap">
+	select budget
+	from account_budget
+	where account_id=#account_id#
+	and region_id=#region_to#
+	</select>	
+	
+	<update id="rejectUpdateTo"  parameterClass="HashMap" >
+	update account_budget
+	set budget = #money#
+	where account_id=#account_id#
+	and region_id=#region_to#
+	</update>
+	
+</sqlMap>

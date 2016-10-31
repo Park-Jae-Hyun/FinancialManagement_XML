@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="GCM">
+	
+	<select id="checkRegisterDevice" parameterClass="HashMap" resultClass="Integer">
+	SELECT count(*)
+	FROM push_reg
+	WHERE phone = #phone#
+	</select>
+	
+	<update id="insertRegisterDevice" parameterClass="HashMap" >
+	INSERT push_reg (phone, reg_id)
+	VALUES (#phone#, #regid#)
+	</update>
+	
+	<update id="updateRegisterDevice" parameterClass="HashMap" >
+	UPDATE push_reg
+	SET reg_id = #regid#
+	WHERE phone = #phone#
+	</update>
+	
+	<select id="getAllRegID" resultClass="String">
+	SELECT p.reg_id
+	FROM push_reg p,
+			 user u
+	WHERE p.phone = u.phone
+	</select>
+	
+	<select id="getRegID" parameterClass="String" resultClass="String">
+	SELECT p.reg_id
+	FROM push_reg p,
+			 user u
+	WHERE p.phone = u.phone
+	AND u.region_id = #region_id#
+	</select>		
+</sqlMap>

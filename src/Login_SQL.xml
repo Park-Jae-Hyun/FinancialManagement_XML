@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="Login">
+
+	<select id="checkID"  parameterClass="String"  resultClass="String">
+	SELECT user_id FROM user WHERE user_id =#id#
+	</select>
+	
+	<select id="checkIDPW" parameterClass="HashMap"  resultClass="Integer">
+	SELECT count(*) FROM user WHERE user_id = #id# AND user_pass=password(#pw#)
+	</select>
+	
+	<select id="checkRole" parameterClass="HashMap"  resultClass="Integer">
+	SELECT level FROM user WHERE user_id=#id#
+	</select>	
+	
+	<select id="checkRegion" parameterClass="String"  resultClass="String">
+	SELECT region_name FROM region WHERE region_id=#loc_id#
+	</select>	
+	
+	<select id="getUserInfo" parameterClass="String"  resultClass="HashMap">
+	SELECT u.user_id, u.user_name, u.region_id, r.region_name, u.level, u.phone
+	FROM USER u, region r
+	WHERE u.user_id =#user_id# 
+	AND 	u.region_id = r.region_id
+	</select>
+	
+	<select id="getRegionID" parameterClass="String"  resultClass="Integer">
+	SELECT region_id FROM region WHERE region_name = #region_id#
+	</select>	
+	
+	<update id="insertUser" parameterClass="HashMap">
+	INSERT INTO user (user_id, user_pass, user_name, region_id, level, phone)
+	VALUES (#userJoinID#, password(#pw#), #userJoinName#, #userRegion#, '10',  #userJoinPhone#)
+	</update>
+	
+	<select id="checkSessionId" parameterClass="String" resultClass="String">
+	SELECT user_id 
+	 FROM user
+	WHERE session_id = #session_id#
+	</select>
+	
+	<update id="updateSessionId" parameterClass="HashMap">
+	UPDATE USER
+	SET SESSION_ID = #session_id#
+	WHERE USER_ID = #user_id#
+	</update>
+</sqlMap>

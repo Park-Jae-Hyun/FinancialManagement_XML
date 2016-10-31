@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="RegionManage">
+
+	<!-- ajaxCheckRegionId : 지역코드를 전달받아 사용중(DB에 있는지) 검사한다. -->
+	<select id="ajaxCheckRegionId"  parameterClass="Integer"  resultClass="Integer">
+	select count(*) as cnt
+	from region
+	where region_id = #region_id#
+	</select>
+	
+	<!-- deleteAllRegion : 모든 지역 코드를 삭제 처리한다. -->
+	<update id="deleteAllRegion" >
+	update region
+	set delete_flag = 'D'
+	</update>
+	
+	<select id="checkRegionId" parameterClass="Integer" resultClass="HashMap">
+	select region_id, region_name, region_order, delete_flag
+	from region
+	where region_id = #region_id#
+	</select>
+	
+	<update id="updateRegionValue" parameterClass="HashMap" >
+	update region
+	set region_name = #region_name#,
+	region_order = #region_order#,
+	delete_flag = NULL
+	where region_id = #region_id#
+	</update>	
+	
+	<update id="insertRegionValue" parameterClass="HashMap">
+	insert region (region_id, region_name, region_order, delete_flag)
+	values (#region_id#, #region_name#, #region_order#, NULL)
+	</update>
+</sqlMap>

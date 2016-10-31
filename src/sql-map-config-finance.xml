@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMapConfig PUBLIC "-//ibatis.apache.org//DTD SQL Map Config 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-config-2.dtd">
+
+<sqlMapConfig>
+	<settings 
+		cacheModelsEnabled="true" 
+		enhancementEnabled="true"
+		lazyLoadingEnabled="true" 
+		maxRequests="512" 
+		maxSessions="512"
+		maxTransactions="512" 
+		useStatementNamespaces="true" />
+	
+	<sqlMap resource="org/dgssm/finance/config/sql/Common_SQL.xml" />
+	<sqlMap resource="org/dgssm/finance/config/sql/Login_SQL.xml" />
+	<sqlMap resource="org/dgssm/finance/config/sql/Account_SQL.xml" />
+	<sqlMap resource="org/dgssm/finance/config/sql/AllRegion_SQL.xml" />
+	<sqlMap resource="org/dgssm/finance/config/sql/AccountRegister_SQL.xml" />
+	<sqlMap resource="org/dgssm/finance/config/sql/RegionExpense_SQL.xml" />
+	<sqlMap resource="org/dgssm/finance/config/sql/RegionManage_SQL.xml" />
+	<sqlMap resource="org/dgssm/finance/config/sql/MemberManage_SQL.xml" />
+	<sqlMap resource="org/dgssm/finance/config/sql/SharingSite_SQL.xml" />
+	<sqlMap resource="org/dgssm/finance/config/sql/SMS_SQL.xml" />
+	<sqlMap resource="org/dgssm/finance/config/sql/GCM_SQL.xml" />
+	<sqlMap resource="org/dgssm/finance/config/sql/MyInfo_SQL.xml" />
+	<sqlMap resource="org/dgssm/finance/config/sql/LendExpense_SQL.xml" />
+</sqlMapConfig>
+

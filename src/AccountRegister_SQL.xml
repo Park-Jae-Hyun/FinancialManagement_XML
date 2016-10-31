@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="AccountRegister">
+	
+	<insert id="makeAccount" parameterClass="HashMap">
+	insert into account (account_name, years, month)
+	values (#account_name#, #years#, #month#)
+	<selectKey keyProperty="id" resultClass="long"> 
+ 	 SELECT LAST_INSERT_ID();
+  	</selectKey>
+	
+	</insert>
+	<!-- 새로운 계정 등록 -->
+	<update id="insertAccountBudget"  parameterClass="List" >
+	insert into account_budget
+						   (`account_id`,
+							`region_id`,
+							`budget`,
+							`is_write`)
+		<dynamic>
+			<iterate prepend="VALUES" conjunction="," >
+			(
+				#List[].account_id#,
+				#List[].region_id#,
+				#List[].budget#,
+				NULL
+			)
+			</iterate>
+		</dynamic>
+	</update>
+	
+</sqlMap>
